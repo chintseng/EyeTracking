@@ -34,6 +34,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import android.graphics.Color;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -99,6 +100,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
+
 
         final Button button = (Button) findViewById(R.id.flipButton);
         button.setOnClickListener(mFlipButtonListener);
@@ -304,7 +306,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
             // speed up detection, in that it can quit after finding a single face and can assume
             // that the nextIrisPosition face position is usually relatively close to the last seen
             // face position.
-            Tracker<Face> tracker = new GooglyFaceTracker(mGraphicOverlay);
+            Tracker<Face> tracker = new GooglyFaceTracker(mGraphicOverlay, mPreview);
             processor = new LargestFaceFocusingProcessor.Builder(detector, tracker).build();
         } else {
             // For rear facing mode, a factory is used to create per-face tracker instances.  A
@@ -321,23 +323,14 @@ public final class GooglyEyesActivity extends AppCompatActivity {
             MultiProcessor.Factory<Face> factory = new MultiProcessor.Factory<Face>() {
                 @Override
                 public Tracker<Face> create(Face face) {
-                    return new GooglyFaceTracker(mGraphicOverlay);
+                    return new GooglyFaceTracker(mGraphicOverlay, mPreview);
                 }
             };
             processor = new MultiProcessor.Builder<>(factory).build();
         }
 
         detector.setProcessor(processor);
-        /*Frame frame = Frame.Builder().setBitmap(myBitmap).build();
-        ByteBuffer byteBuffer = frame.getGrayscaleImageData();
-        byte[] bytes = byteBuffer.array();
-        int w = frame.getMetadata().getWidth();
-        int h = frame.getMetadata().getHeight();
-        YuvImage yuvimage=new YuvImage(byteBuffer, ImageFormat.NV21, w, h, null);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        yuvimage.compressToJpeg(new Rect(0, 0, w, h), 100, baos); // Where 100 is the quality of the generated jpeg
-        byte[] jpegArray = baos.toByteArray();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);*/
+
 
         if (!detector.isOperational()) {
             // Note: The first time that an app using face API is installed on a device, GMS will
@@ -372,6 +365,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
      */
     private void createCameraSource() {
         Context context = getApplicationContext();
+
         FaceDetector detector = createFaceDetector(context);
 
         int facing = CameraSource.CAMERA_FACING_FRONT;
@@ -414,12 +408,17 @@ public final class GooglyEyesActivity extends AppCompatActivity {
         if (mCameraSource != null) {
             try {
                 mPreview.start(mCameraSource, mGraphicOverlay);
+
             } catch (IOException e) {
                 Log.e(TAG, "Unable to start camera source.", e);
                 mCameraSource.release();
                 mCameraSource = null;
             }
         }
+    }
+
+    public CameraSourcePreview GetPreview(){
+        return (CameraSourcePreview) findViewById(R.id.preview);
     }
 
 

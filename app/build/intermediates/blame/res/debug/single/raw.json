@@ -1,10 +1,6 @@
 [
     {
-        "merged": "/Users/Chin/Downloads/android-vision-master/visionSamples/googly-eyes/app/build/intermediates/res/merged/debug/raw/gtm_analytics",
-        "source": "/Users/Chin/Downloads/android-vision-master/visionSamples/googly-eyes/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-analytics/8.4.0/res/raw/gtm_analytics"
-    },
-    {
-        "merged": "/Users/Chin/Desktop/files/googly-eyes/app/build/intermediates/res/merged/debug/raw/gtm_analytics",
-        "source": "/Users/Chin/Desktop/files/googly-eyes/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-analytics/8.4.0/res/raw/gtm_analytics"
+        "merged": "/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/res/merged/debug/raw/gtm_analytics",
+        "source": "/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-analytics/8.4.0/res/raw/gtm_analytics"
     }
 ]

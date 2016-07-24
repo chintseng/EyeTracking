@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "/Users/Chin/Downloads/android-vision-master/visionSamples/googly-eyes/app/build/intermediates/res/merged/debug/values-w500dp-v13/values-w500dp-v13.xml",
+        "outputFile": "/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/res/merged/debug/values-w500dp-v13/values-w500dp-v13.xml",
         "map": [
             {
                 "to": {
@@ -11,31 +11,7 @@
                     "endOffset": 105
                 },
                 "from": {
-                    "file": "/Users/Chin/Downloads/android-vision-master/visionSamples/googly-eyes/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-w500dp/values-w500dp.xml",
-                    "position": {
-                        "startLine": 4,
-                        "startColumn": 4,
-                        "startOffset": 279,
-                        "endColumn": 54,
-                        "endOffset": 329
-                    }
-                }
-            }
-        ]
-    },
-    {
-        "outputFile": "/Users/Chin/Desktop/files/googly-eyes/app/build/intermediates/res/merged/debug/values-w500dp-v13/values-w500dp-v13.xml",
-        "map": [
-            {
-                "to": {
-                    "startLine": 2,
-                    "startColumn": 4,
-                    "startOffset": 55,
-                    "endColumn": 54,
-                    "endOffset": 105
-                },
-                "from": {
-                    "file": "/Users/Chin/Desktop/files/googly-eyes/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-w500dp/values-w500dp.xml",
+                    "file": "/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-w500dp/values-w500dp.xml",
                     "position": {
                         "startLine": 4,
                         "startColumn": 4,

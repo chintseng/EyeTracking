@@ -1,0 +1,7 @@
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/android/tools/fd/runtime/AppPatchesLoaderImpl.class
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/google/android/gms/samples/vision/face/googlyeyes/GooglyEyesActivity$override.class
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/google/android/gms/samples/vision/face/googlyeyes/GooglyFaceTracker$override.class
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/google/android/gms/samples/vision/face/googlyeyes/GooglyEyesActivity$1$override.class
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/google/android/gms/samples/vision/face/googlyeyes/GooglyEyesActivity$4$override.class
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/google/android/gms/samples/vision/face/googlyeyes/GooglyEyesActivity$3$override.class
+CHANGED,/Users/Andy/Dropbox/Projects/EyeTracking/app/build/intermediates/transforms/instantRun/debug/folders/4000/5/enhanced/com/google/android/gms/samples/vision/face/googlyeyes/GooglyEyesActivity$2$override.class

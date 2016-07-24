@@ -29,9 +29,13 @@ import android.graphics.YuvImage;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 
+import com.google.android.gms.samples.vision.face.googlyeyes.ui.camera.CameraSourcePreview;
 import com.google.android.gms.samples.vision.face.googlyeyes.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -60,11 +64,15 @@ import java.util.Map;
  * face was detected but one or both of the eyes were not detected.  Missing landmarks can happen
  * during quick movements due to camera image blurring.
  */
-class GooglyFaceTracker extends Tracker<Face> {
+class GooglyFaceTracker extends Tracker<Face>{
+
     private static final float EYE_CLOSED_THRESHOLD = 0.4f;
 
     private GraphicOverlay mOverlay;
     private GooglyEyesGraphic mEyesGraphic;
+
+
+    private CameraSourcePreview mPreview;
 
     // Record the previously seen proportions of the landmark locations relative to the bounding box
     // of the face.  These proportions can be used to approximate where the landmarks are within the
@@ -81,8 +89,9 @@ class GooglyFaceTracker extends Tracker<Face> {
     // Methods
     //==============================================================================================
 
-    GooglyFaceTracker(GraphicOverlay overlay) {
+    GooglyFaceTracker(GraphicOverlay overlay, CameraSourcePreview preview) {
         mOverlay = overlay;
+        mPreview = preview;
     }
 
     /**
@@ -104,6 +113,8 @@ class GooglyFaceTracker extends Tracker<Face> {
     private boolean flag = true;
     @Override
     public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
+
+
         mOverlay.add(mEyesGraphic);
 
         updatePreviousProportions(face);
@@ -130,10 +141,37 @@ class GooglyFaceTracker extends Tracker<Face> {
         }
 
         if(flag) {
-            View v = mOverlay;
-            int a = mOverlay.getLayoutParams().width;
-            String s = Integer.toString(a);
-            Log.d("dddddddddd", s);
+
+            Display display = getWindowManager().getDefaultDisplay();
+
+
+            mPreview.setDrawingCacheEnabled(true);
+            mPreview.buildDrawingCache(true);
+            Bitmap bitmap = mPreview.getDrawingCache();
+            if(bitmap != null){
+                int pixel = bitmap.getPixel(50, 50);
+                Log.d("Width: ", Integer.toString(bitmap.getWidth()));
+                Log.d("Height: ", Integer.toString(bitmap.getHeight()));
+                Log.d("Red: ", Integer.toString(Color.red(pixel)));
+                Log.d("Green: ", Integer.toString(Color.green(pixel)));
+                Log.d("Blue: ", Integer.toString(Color.blue(pixel)));
+            }
+            else{
+                Log.d("Nothing: ", "Nothing");
+            }
+
+
+            /*mOverlay.setDrawingCacheEnabled(true);
+            mOverlay.buildDrawingCache(true);
+            Bitmap bitmap = mOverlay.getDrawingCache();
+            int pixel = bitmap.getPixel(50, 50);
+            Log.d("Width: ", Integer.toString(bitmap.getWidth()));
+            Log.d("Height: ", Integer.toString(bitmap.getHeight()));
+            Log.d("Red: ", Integer.toString(Color.red(pixel)));
+            Log.d("Green: ", Integer.toString(Color.green(pixel)));
+            Log.d("Blue: ", Integer.toString(Color.blue(pixel)));*/
+
+
             /*Bitmap b = Bitmap.createBitmap( v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(b);
             v.layout(0, 0, v.getLayoutParams().width, v.getLayoutParams().height);
