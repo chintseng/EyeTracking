@@ -24,11 +24,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -39,7 +39,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -48,8 +47,6 @@ import com.google.android.gms.samples.vision.face.googlyeyes.ui.camera.CameraSou
 import com.google.android.gms.samples.vision.face.googlyeyes.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.LargestFaceFocusingProcessor;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -84,7 +81,8 @@ public final class GooglyEyesActivity extends AppCompatActivity {
     private GraphicOverlay mGraphicOverlay;
 
     private boolean mIsFrontFacing = true;
-
+    //////jean
+    private static final int REQUEST_WRITE_STORAGE = 112;
     //==============================================================================================
     // Activity Methods
     //==============================================================================================
@@ -107,7 +105,6 @@ public final class GooglyEyesActivity extends AppCompatActivity {
             mIsFrontFacing = savedInstanceState.getBoolean("IsFrontFacing");
         }
 
-
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -116,8 +113,18 @@ public final class GooglyEyesActivity extends AppCompatActivity {
         } else {
             requestCameraPermission();
         }
-        View rootView = this.getWindow().getDecorView().findViewById(android.R.id.content).getRootView();
+
+        //// jean check for the storage permission.
+        boolean hasPermission = (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+        if (!hasPermission) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_STORAGE);
+        }
+
     }
+
 
     /**
      * Handles the requesting of the camera permission.  This includes showing a "Snackbar" message
@@ -199,6 +206,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        /*
         if (requestCode != RC_HANDLE_CAMERA_PERM) {
             Log.d(TAG, "Got unexpected permission result: " + requestCode);
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -226,6 +234,37 @@ public final class GooglyEyesActivity extends AppCompatActivity {
                 .setMessage(R.string.no_camera_permission)
                 .setPositiveButton(R.string.ok, listener)
                 .show();
+        */
+        switch (requestCode) {
+            case REQUEST_WRITE_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {} else { Log.e(TAG, "request write storage fail!");}
+            }
+            case RC_HANDLE_CAMERA_PERM: {
+                if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Camera permission granted - initialize the camera source");
+                    // we have permission, so create the camerasource
+                    createCameraSource();
+                    return;
+                }
+            }
+            default:{
+                Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
+                        " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
+
+                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Face Tracker sample")
+                        .setMessage(R.string.no_camera_permission)
+                        .setPositiveButton(R.string.ok, listener)
+                        .show();
+            }
+        }
     }
 
     //==============================================================================================
@@ -268,7 +307,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
      * warning if it was not possible to download the face library.
      */
     @NonNull
-    private FaceDetector createFaceDetector(Context context) {
+    private CustomFaceDetector createFaceDetector(Context context) {
         // For both front facing and rear facing modes, the detector is initialized to do landmark
         // detection (to find the eyes), classification (to determine if the eyes are open), and
         // tracking.
@@ -287,7 +326,10 @@ public final class GooglyEyesActivity extends AppCompatActivity {
         // we increase the minimum face size for the rear facing mode a little bit in order to make
         // tracking faster (at the expense of missing smaller faces).  But this optimization is less
         // important for the front facing case, because when "prominent face only" is enabled, the
-        // detector stops scanning for faces after it has found the first (large) face.
+        //
+
+
+
         FaceDetector detector = new FaceDetector.Builder(context)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
@@ -297,6 +339,9 @@ public final class GooglyEyesActivity extends AppCompatActivity {
                 .setMinFaceSize(mIsFrontFacing ? 0.35f : 0.15f)
                 .build();
 
+        final CustomFaceDetector detector2 = new CustomFaceDetector(detector);
+
+
         Detector.Processor<Face> processor;
         if (mIsFrontFacing) {
             // For front facing mode, a single tracker instance is used with an associated focusing
@@ -304,8 +349,8 @@ public final class GooglyEyesActivity extends AppCompatActivity {
             // speed up detection, in that it can quit after finding a single face and can assume
             // that the nextIrisPosition face position is usually relatively close to the last seen
             // face position.
-            Tracker<Face> tracker = new GooglyFaceTracker(mGraphicOverlay);
-            processor = new LargestFaceFocusingProcessor.Builder(detector, tracker).build();
+            Tracker<Face> tracker = new GooglyFaceTracker(mGraphicOverlay, detector2);
+            processor = new LargestFaceFocusingProcessor.Builder(detector2, tracker).build();
         } else {
             // For rear facing mode, a factory is used to create per-face tracker instances.  A
             // tracker is created for each face and is maintained as long as the same face is
@@ -321,25 +366,18 @@ public final class GooglyEyesActivity extends AppCompatActivity {
             MultiProcessor.Factory<Face> factory = new MultiProcessor.Factory<Face>() {
                 @Override
                 public Tracker<Face> create(Face face) {
-                    return new GooglyFaceTracker(mGraphicOverlay);
+                    return new GooglyFaceTracker(mGraphicOverlay, detector2);
                 }
             };
             processor = new MultiProcessor.Builder<>(factory).build();
         }
 
-        detector.setProcessor(processor);
-        /*Frame frame = Frame.Builder().setBitmap(myBitmap).build();
-        ByteBuffer byteBuffer = frame.getGrayscaleImageData();
-        byte[] bytes = byteBuffer.array();
-        int w = frame.getMetadata().getWidth();
-        int h = frame.getMetadata().getHeight();
-        YuvImage yuvimage=new YuvImage(byteBuffer, ImageFormat.NV21, w, h, null);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        yuvimage.compressToJpeg(new Rect(0, 0, w, h), 100, baos); // Where 100 is the quality of the generated jpeg
-        byte[] jpegArray = baos.toByteArray();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(jpegArray, 0, jpegArray.length);*/
+        // jean
+        detector2.setProcessor(processor);
+        //detector.setProcessor(processor);
 
-        if (!detector.isOperational()) {
+
+        if (!detector2.isOperational()) {
             // Note: The first time that an app using face API is installed on a device, GMS will
             // download a native library to the device in order to do detection.  Usually this
             // completes before the app is run for the first time.  But if that download has not yet
@@ -360,7 +398,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
                 Log.w(TAG, getString(R.string.low_storage_error));
             }
         }
-        return detector;
+        return detector2;
     }
 
     //==============================================================================================
@@ -372,7 +410,7 @@ public final class GooglyEyesActivity extends AppCompatActivity {
      */
     private void createCameraSource() {
         Context context = getApplicationContext();
-        FaceDetector detector = createFaceDetector(context);
+        CustomFaceDetector detector = createFaceDetector(context);
 
         int facing = CameraSource.CAMERA_FACING_FRONT;
         if (!mIsFrontFacing) {

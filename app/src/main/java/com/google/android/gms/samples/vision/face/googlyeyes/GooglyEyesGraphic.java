@@ -19,6 +19,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.util.Log;
 
 import com.google.android.gms.samples.vision.face.googlyeyes.ui.camera.GraphicOverlay;
 
@@ -44,13 +45,15 @@ class GooglyEyesGraphic extends GraphicOverlay.Graphic {
     private volatile PointF mRightPosition;
     private volatile boolean mRightOpen;
 
+    private CustomFaceDetector mCustom = null;
+
     //==============================================================================================
     // Methods
     //==============================================================================================
 
-    GooglyEyesGraphic(GraphicOverlay overlay) {
+    GooglyEyesGraphic(GraphicOverlay overlay, CustomFaceDetector custom) {
         super(overlay);
-
+        mCustom = custom;
         mEyeWhitesPaint = new Paint();
         mEyeWhitesPaint.setColor(Color.WHITE);
         mEyeWhitesPaint.setStyle(Paint.Style.FILL);
@@ -62,6 +65,7 @@ class GooglyEyesGraphic extends GraphicOverlay.Graphic {
         mEyeIrisPaint = new Paint();
         mEyeIrisPaint.setColor(Color.BLACK);
         mEyeIrisPaint.setStyle(Paint.Style.FILL);
+        mEyeIrisPaint.setTextSize(new Float(60.0));
 
         mEyeOutlinePaint = new Paint();
         mEyeOutlinePaint.setColor(Color.BLACK);
@@ -105,9 +109,11 @@ class GooglyEyesGraphic extends GraphicOverlay.Graphic {
         // Use the inter-eye distance to set the size of the eyes.
         float distance = (float) Math.sqrt(
                 Math.pow(rightPosition.x - leftPosition.x, 2) +
-                Math.pow(rightPosition.y - leftPosition.y, 2));
+                        Math.pow(rightPosition.y - leftPosition.y, 2));
         float eyeRadius = EYE_RADIUS_PROPORTION * distance;
         float irisRadius = IRIS_RADIUS_PROPORTION * distance;
+
+        mCustom.getMyEye(rightPosition, leftPosition);
 
         // Advance the current left iris position, and draw left eye.
         PointF leftIrisPosition =
@@ -118,6 +124,9 @@ class GooglyEyesGraphic extends GraphicOverlay.Graphic {
         PointF rightIrisPosition =
                 mRightPhysics.nextIrisPosition(rightPosition, eyeRadius, irisRadius);
         drawEye(canvas, rightPosition, eyeRadius, rightIrisPosition, irisRadius, mRightOpen);
+
+
+
     }
 
     /**
@@ -134,6 +143,7 @@ class GooglyEyesGraphic extends GraphicOverlay.Graphic {
             float start = eyePosition.x - eyeRadius;
             float end = eyePosition.x + eyeRadius;
             canvas.drawLine(start, y, end, y, mEyeOutlinePaint);*/
+
         }
         canvas.drawCircle(eyePosition.x, eyePosition.y, eyeRadius, mEyeOutlinePaint);
     }

@@ -66,6 +66,9 @@ class GooglyFaceTracker extends Tracker<Face> {
     private GraphicOverlay mOverlay;
     private GooglyEyesGraphic mEyesGraphic;
 
+    // jean
+    private CustomFaceDetector mCustom;
+
     // Record the previously seen proportions of the landmark locations relative to the bounding box
     // of the face.  These proportions can be used to approximate where the landmarks are within the
     // face bounding box if the eye landmark is missing in a future update.
@@ -81,7 +84,8 @@ class GooglyFaceTracker extends Tracker<Face> {
     // Methods
     //==============================================================================================
 
-    GooglyFaceTracker(GraphicOverlay overlay) {
+    GooglyFaceTracker(GraphicOverlay overlay, CustomFaceDetector custom) {
+        mCustom = custom;
         mOverlay = overlay;
     }
 
@@ -90,10 +94,7 @@ class GooglyFaceTracker extends Tracker<Face> {
      */
     @Override
     public void onNewItem(int id, Face face) {
-
-
-
-        mEyesGraphic = new GooglyEyesGraphic(mOverlay);
+        mEyesGraphic = new GooglyEyesGraphic(mOverlay, mCustom);
     }
 
     /**
@@ -101,7 +102,7 @@ class GooglyFaceTracker extends Tracker<Face> {
      * recent face detection results.  The graphic will render the eyes and simulate the motion of
      * the iris based upon these changes over time.
      */
-    private boolean flag = true;
+
     @Override
     public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
         mOverlay.add(mEyesGraphic);
@@ -110,6 +111,9 @@ class GooglyFaceTracker extends Tracker<Face> {
 
         PointF leftPosition = getLandmarkPosition(face, Landmark.LEFT_EYE);
         PointF rightPosition = getLandmarkPosition(face, Landmark.RIGHT_EYE);
+
+        Log.d("position left", Float.toString(leftPosition.x) + "  " + Float.toString(leftPosition.y));
+        Log.d("position right", Float.toString(rightPosition.x) + "  " + Float.toString(rightPosition.y));
 
         float leftOpenScore = face.getIsLeftEyeOpenProbability();
         boolean isLeftOpen;
@@ -129,44 +133,7 @@ class GooglyFaceTracker extends Tracker<Face> {
             mPreviousIsRightOpen = isRightOpen;
         }
 
-        if(flag) {
-            View v = mOverlay;
-            int a = mOverlay.getLayoutParams().width;
-            String s = Integer.toString(a);
-            Log.d("dddddddddd", s);
-            /*Bitmap b = Bitmap.createBitmap( v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(b);
-            v.layout(0, 0, v.getLayoutParams().width, v.getLayoutParams().height);
-            v.draw(c);
-
-            if(b == null) { Log.d("jean", "null!!!!!!"); }
-            else {
-                int[] pixs = new int[b.getHeight() * b.getWidth()];
-                int w = b.getWidth();
-                int h = b.getHeight();
-                String s1 = Integer.toString(w);
-                String s2 = Integer.toString(h);
-                Log.d("jean wwwwwwwwww", s1);
-                Log.d("jean hhhhhhhhhh", s2);
-
-                b.getPixels(pixs, 0, w, 0, 0, w, h);
-
-
-                for (int i = 0; i < 60; i++) {
-                    for (int j = 2; j < 5; j++) {
-                        int tmp = b.getPixel(i, j);
-                        String s = Integer.toString(tmp);
-                        String num = Integer.toString(i);
-                        Log.d(num, s);
-                    }
-                }
-            }*/
-
-            flag = false;
-        }
-
         mEyesGraphic.updateEyes(leftPosition, isLeftOpen, rightPosition, isRightOpen);
-
 
     }
 
@@ -225,22 +192,4 @@ class GooglyFaceTracker extends Tracker<Face> {
         return new PointF(x, y);
     }
 
-
-
-
-    /*private Bitmap takeScreenShot(View view) {
-        // configuramos para que la view almacene la cache en una imagen
-        view.setDrawingCacheEnabled(true);
-        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-        view.buildDrawingCache();
-
-        if(view.getDrawingCache() == null) return null; // Verificamos antes de que no sea null
-
-        // utilizamos esa cache, para crear el bitmap que tendra la imagen de la view actual
-        Bitmap snapshot = Bitmap.createBitmap(view.getDrawingCache());
-        view.setDrawingCacheEnabled(false);
-        view.destroyDrawingCache();
-
-        return snapshot;
-    }*/
 }
